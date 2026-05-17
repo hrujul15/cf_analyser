@@ -1,4 +1,4 @@
-name: cf_analyser
+name: cfar
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -34,6 +34,9 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  flutter_cache_manager: ^3.4.1
+  http: ^1.6.0
+  fl_chart: ^1.2.0
 
 dev_dependencies:
   flutter_test:
@@ -85,5 +88,21 @@ flutter:
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
   #
+fonts:
+    - family: Rajdhani
+      fonts:
+        - asset: fonts/Rajdhani-Regular.ttf
+          weight: 400
+
+        - asset: fonts/Rajdhani-Medium.ttf
+          weight: 500
+
+        - asset: fonts/Rajdhani-SemiBold.ttf
+          weight: 600
+
+        - asset: fonts/Rajdhani-Bold.ttf
+          weight: 700
+
+
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
