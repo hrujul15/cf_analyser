@@ -35,19 +35,23 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
-    final isNarrow = w < 600;
-    print(w);
+    final isNarrow = w < 900;
+    // print(isNarrow);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFF4CC9F0),
-        title: const Text(
+        title: Text(
           'CFAR - Codeforces Analyzer & Recommender',
-          style: TextStyle(fontWeight: FontWeight.w700),
+          softWrap: true,
+          maxLines: 2,
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: isNarrow ? 13 : 22,
+          ),
         ),
         actions: [
           SizedBox(
-            width: 300,
-
+            width: isNarrow ? 150 : 350,
             child: Padding(
               padding: const EdgeInsets.only(right: 12.0),
               child: TextField(
@@ -67,15 +71,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     });
                   });
                 },
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.w700,
-                  fontSize: 22,
+                  fontSize: isNarrow ? 15 : 22,
                 ),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   contentPadding: EdgeInsets.all(5),
                   hintText: 'Enter username',
-                  hintStyle: TextStyle(color: Colors.black),
+                  hintStyle: TextStyle(
+                    color: Colors.black,
+                    fontSize: isNarrow ? 13 : 20,
+                  ),
                   filled: true,
                   fillColor: Colors.white12,
                   border: OutlineInputBorder(),
@@ -97,11 +104,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 future: futureProfile,
                 builder: (context, snapshot) {
                   if (futureProfile == null) {
-                    return const Text(
-                      "Enter handle",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
+                    return Center(
+                      child: const Text(
+                        "Enter handle",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     );
                   }
@@ -121,126 +130,130 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: Image.network(
                                   snapshot.data!.titlePhoto ??
                                       "https://userpic.codeforces.org/no-title.jpg",
-                                  width: 400,
-                                  height: 400,
+                                  width: isNarrow ? 180 : 400,
+                                  height: isNarrow ? 180 : 400,
                                   fit: BoxFit.cover,
                                 ),
                               ),
-                              const SizedBox(width: 20),
-                              Column(
-                                children: [
-                                  coloredHandle(snapshot.data!, context),
-                                  // const SizedBox(height: 10),
+                              SizedBox(width: isNarrow ? 10 : 20),
+                              Expanded(
+                                child: Column(
+                                  // mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    coloredHandle(snapshot.data!, context),
+                                    // const SizedBox(height: 10),
 
-                                  // 2. Min Rating (placeholder logic)
-                                  Row(
-                                    children: [
-                                      Text(
-                                        "Current Rating: ",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 28,
-                                        ),
-                                      ),
-                                      Text(
-                                        "${snapshot.data!.rating ?? "Unrated"}",
-                                        style: TextStyle(
-                                          color: getCFColor(
-                                            snapshot.data!.rating,
+                                    // 2. Min Rating (placeholder logic)
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "Current Rating: ",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: isNarrow ? 12 : 28,
                                           ),
-                                          fontSize: 28,
-                                          fontWeight: FontWeight.w600,
                                         ),
-                                      ),
-                                    ],
-                                  ),
-
-                                  // 3. Max Rating
-                                  Row(
-                                    children: [
-                                      Text(
-                                        "Max Rating: ",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 28,
-                                        ),
-                                      ),
-                                      Text(
-                                        "${snapshot.data!.maxRating ?? "Unrated"}",
-                                        style: TextStyle(
-                                          color: getCFColor(
-                                            snapshot.data!.maxRating,
+                                        Text(
+                                          "${snapshot.data!.rating ?? "Unrated"}",
+                                          style: TextStyle(
+                                            color: getCFColor(
+                                              snapshot.data!.rating,
+                                            ),
+                                            fontSize: isNarrow ? 12 : 28,
+                                            fontWeight: FontWeight.w600,
                                           ),
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 28,
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  Text(
-                                    "Recent Contests",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 18,
+                                      ],
                                     ),
-                                  ),
-                                  const SizedBox(height: 10),
 
-                                  // 4. Last 5 contests (PLACEHOLDER CHIPS)
-                                  Wrap(
-                                    spacing: 8,
-                                    children: List.generate(
-                                      min(5, ratingHistory.length),
-                                      (index) {
-                                        int n = ratingHistory.length;
-                                        List<String> values = [];
-                                        for (int i = n - 1; i >= 1; --i) {
-                                          int val =
-                                              ratingHistory[i] -
-                                              ratingHistory[i - 1];
-                                          if (val > 0) {
-                                            values.add("+$val");
-                                          } else {
-                                            values.add(val.toString());
+                                    // 3. Max Rating
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "Max Rating: ",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: isNarrow ? 12 : 28,
+                                          ),
+                                        ),
+                                        Text(
+                                          "${snapshot.data!.maxRating ?? "Unrated"}",
+                                          style: TextStyle(
+                                            color: getCFColor(
+                                              snapshot.data!.maxRating,
+                                            ),
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: isNarrow ? 12 : 28,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Text(
+                                      "Recent Contests",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: isNarrow ? 12 : 18,
+                                      ),
+                                    ),
+                                    SizedBox(height: isNarrow ? 5 : 10),
+
+                                    // 4. Last 5 contests (PLACEHOLDER CHIPS)
+                                    Wrap(
+                                      spacing: 8,
+                                      children: List.generate(
+                                        min(5, ratingHistory.length),
+                                        (index) {
+                                          int n = ratingHistory.length;
+                                          List<String> values = [];
+                                          for (int i = n - 1; i >= 1; --i) {
+                                            int val =
+                                                ratingHistory[i] -
+                                                ratingHistory[i - 1];
+                                            if (val > 0) {
+                                              values.add("+$val");
+                                            } else {
+                                              values.add(val.toString());
+                                            }
                                           }
-                                        }
 
-                                        final val = values[index];
-                                        final isPlus = val.startsWith("+");
-                                        final isMinus = val.startsWith("-");
+                                          final val = values[index];
+                                          final isPlus = val.startsWith("+");
+                                          final isMinus = val.startsWith("-");
 
-                                        return Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 10,
-                                            vertical: 6,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: isPlus
-                                                ? Colors.green[900]
-                                                : isMinus
-                                                ? Colors.red[900]
-                                                : Colors.grey,
-                                            borderRadius: BorderRadius.circular(
-                                              5,
+                                          return Container(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: isNarrow ? 5 : 10,
+                                              vertical: isNarrow ? 3 : 6,
                                             ),
-                                          ),
-                                          child: Text(
-                                            val,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w600,
+                                            decoration: BoxDecoration(
+                                              color: isPlus
+                                                  ? Colors.green[900]
+                                                  : isMinus
+                                                  ? Colors.red[900]
+                                                  : Colors.grey,
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
                                             ),
-                                          ),
-                                        );
-                                      },
+                                            child: Text(
+                                              val,
+                                              style: TextStyle(
+                                                fontSize: isNarrow ? 8 : 20,
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
                                     ),
-                                  ),
 
-                                  const SizedBox(height: 15),
-                                ],
+                                    const SizedBox(height: 15),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
@@ -262,11 +275,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     );
                   } else if (snapshot.hasError) {
-                    return Text(
-                      '${snapshot.error}',
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.w500,
+                    return Center(
+                      child: Text(
+                        '${snapshot.error}',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     );
                   }

@@ -8,6 +8,8 @@ class RatingGraph extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final w = MediaQuery.of(context).size.width;
+    final isNarrow = w < 900;
     if (ratingHistory.isEmpty) {
       return const Center(
         child: Text("No rating data", style: TextStyle(color: Colors.white54)),
@@ -35,11 +37,16 @@ class RatingGraph extends StatelessWidget {
     int contests = ratingHistory.length + 1;
     int contestsInterval = ((contests / 20).floor()) * 2;
     if (contestsInterval == 0) contestsInterval = 1;
-
+    double padding = isNarrow ? 10 : 20;
     return Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: EdgeInsets.only(
+        bottom: 20,
+        top: 20,
+        left: padding,
+        right: padding,
+      ),
       child: SizedBox(
-        height: 600,
+        height: isNarrow ? 300 : 600,
         width: double.infinity,
         child: LineChart(
           LineChartData(
@@ -51,7 +58,7 @@ class RatingGraph extends StatelessWidget {
                 isCurved: true,
                 barWidth: 3,
                 gradient: LinearGradient(colors: [Colors.cyan, Colors.blue]),
-                dotData: FlDotData(show: true),
+                dotData: FlDotData(show: false),
               ),
             ],
             titlesData: FlTitlesData(
@@ -69,9 +76,9 @@ class RatingGraph extends StatelessWidget {
                     }
                     return Text(
                       value.toInt().toString(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white54,
-                        fontSize: 15,
+                        fontSize: isNarrow ? 10 : 15,
                       ),
                     );
                   },
@@ -80,7 +87,7 @@ class RatingGraph extends StatelessWidget {
               leftTitles: AxisTitles(
                 sideTitles: SideTitles(
                   showTitles: true,
-                  reservedSize: 50,
+                  reservedSize: isNarrow ? 30 : 50,
 
                   interval: ratingInterval.toDouble(),
                   getTitlesWidget: (value, meta) {
@@ -92,9 +99,9 @@ class RatingGraph extends StatelessWidget {
                     }
                     return Text(
                       value.toInt().toString(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white54,
-                        fontSize: 15,
+                        fontSize: isNarrow ? 10 : 15,
                       ),
                     );
                   },

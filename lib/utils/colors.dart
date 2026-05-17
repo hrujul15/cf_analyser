@@ -34,10 +34,18 @@ Widget coloredHandle(Profile p, BuildContext context) {
     context,
   ).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w700);
 
+  final w = MediaQuery.of(context).size.width;
+  final isNarrow = w < 900;
+
   if ((p.rating ?? 0) < 3000) {
     return Text(
       p.handle ?? "N/A",
-      style: style.copyWith(color: getCFColor(p.rating), fontSize: 64),
+      overflow: TextOverflow.ellipsis,
+      maxLines: 1,
+      style: style.copyWith(
+        color: getCFColor(p.rating),
+        fontSize: isNarrow ? 32 : 64,
+      ),
     );
   }
 
@@ -48,12 +56,20 @@ Widget coloredHandle(Profile p, BuildContext context) {
         const TextSpan(text: ""),
         TextSpan(
           text: p.handle![0],
-          style: const TextStyle(color: Colors.white, fontSize: 64),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: isNarrow ? 32 : 64,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
         const TextSpan(text: ""),
         TextSpan(
           text: p.handle!.substring(1),
-          style: const TextStyle(color: Colors.red, fontSize: 64),
+          style: TextStyle(
+            color: Colors.red,
+            fontSize: isNarrow ? 32 : 64,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ],
     ),
