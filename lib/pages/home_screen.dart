@@ -122,11 +122,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           // 1. PFP + Username row
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               ClipRRect(
-                                borderRadius: BorderRadius.circular(
-                                  2,
-                                ), // keep slight rounding
+                                borderRadius: BorderRadius.circular(2),
                                 child: Image.network(
                                   snapshot.data!.titlePhoto ??
                                       "https://userpic.codeforces.org/no-title.jpg",
@@ -135,89 +134,68 @@ class _HomeScreenState extends State<HomeScreen> {
                                   fit: BoxFit.cover,
                                 ),
                               ),
+
                               SizedBox(width: isNarrow ? 10 : 20),
-                              Expanded(
+
+                              Flexible(
                                 child: Column(
-                                  // mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     coloredHandle(snapshot.data!, context),
-                                    // const SizedBox(height: 10),
 
-                                    // 2. Min Rating (placeholder logic)
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "Current Rating: ",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: isNarrow ? 12 : 28,
-                                          ),
-                                        ),
-                                        Text(
-                                          "${snapshot.data!.rating ?? "Unrated"}",
-                                          style: TextStyle(
-                                            color: getCFColor(
-                                              snapshot.data!.rating,
-                                            ),
-                                            fontSize: isNarrow ? 12 : 28,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ],
+                                    Text(
+                                      "Current Rating: ${snapshot.data!.rating ?? "Unrated"}",
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: isNarrow ? 12 : 28,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
 
-                                    // 3. Max Rating
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "Max Rating: ",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: isNarrow ? 12 : 28,
-                                          ),
-                                        ),
-                                        Text(
-                                          "${snapshot.data!.maxRating ?? "Unrated"}",
-                                          style: TextStyle(
-                                            color: getCFColor(
-                                              snapshot.data!.maxRating,
-                                            ),
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: isNarrow ? 12 : 28,
-                                          ),
-                                        ),
-                                      ],
+                                    Text(
+                                      "Max Rating: ${snapshot.data!.maxRating ?? "Unrated"}",
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: isNarrow ? 12 : 28,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
+
+                                    const SizedBox(height: 8),
+
                                     Text(
                                       "Recent Contests",
                                       style: TextStyle(
                                         color: Colors.white,
-                                        fontWeight: FontWeight.w600,
                                         fontSize: isNarrow ? 12 : 18,
+                                        fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                    SizedBox(height: isNarrow ? 5 : 10),
 
-                                    // 4. Last 5 contests (PLACEHOLDER CHIPS)
                                     Wrap(
                                       spacing: 8,
+                                      runSpacing: 4,
                                       children: List.generate(
                                         min(5, ratingHistory.length),
                                         (index) {
                                           int n = ratingHistory.length;
                                           List<String> values = [];
+
                                           for (int i = n - 1; i >= 1; --i) {
                                             int val =
                                                 ratingHistory[i] -
                                                 ratingHistory[i - 1];
-                                            if (val > 0) {
-                                              values.add("+$val");
-                                            } else {
-                                              values.add(val.toString());
-                                            }
+                                            values.add(
+                                              val > 0 ? "+$val" : "$val",
+                                            );
+                                          }
+
+                                          if (index >= values.length) {
+                                            return const SizedBox();
                                           }
 
                                           final val = values[index];
@@ -250,8 +228,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                         },
                                       ),
                                     ),
-
-                                    const SizedBox(height: 15),
                                   ],
                                 ),
                               ),
