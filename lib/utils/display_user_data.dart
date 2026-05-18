@@ -29,13 +29,20 @@ Color getCFColor(int? rating) {
 }
 
 // Print the rating
-Widget coloredRating(String ratingType, int? rating, bool isNarrow) {
+Widget coloredRating(String ratingType, int? rating, bool isNarrow, double w) {
+  final isNarrow = w < 1550;
+  double medium = 1;
+  if (w < 1550 && w >= 900) {
+    medium = 1.5;
+  } else if (w < 900) {
+    medium = 1.0;
+  }
   return Text.rich(
     TextSpan(
       text: "$ratingType: ",
       style: TextStyle(
         color: Colors.white,
-        fontSize: isNarrow ? 15 : 28,
+        fontSize: isNarrow ? 15 * medium : 28,
         fontWeight: FontWeight.w600,
       ),
       children: <TextSpan>[
@@ -43,7 +50,7 @@ Widget coloredRating(String ratingType, int? rating, bool isNarrow) {
           text: "${rating ?? "Unrated"}",
           style: TextStyle(
             color: getCFColor(rating),
-            fontSize: isNarrow ? 15 : 28,
+            fontSize: isNarrow ? 15 * medium : 28,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -59,8 +66,13 @@ Widget coloredHandle(Profile p, BuildContext context) {
   ).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w700);
 
   final w = MediaQuery.of(context).size.width;
-  final isNarrow = w < 900;
-
+  final isNarrow = w < 1550;
+  double medium = 1;
+  if (w < 1550 && w >= 900) {
+    medium = 1.5;
+  } else if (w < 900) {
+    medium = 1.0;
+  }
   if ((p.rating ?? 0) < 3000) {
     return Text(
       p.handle ?? "N/A",
@@ -68,7 +80,7 @@ Widget coloredHandle(Profile p, BuildContext context) {
       maxLines: 1,
       style: style.copyWith(
         color: getCFColor(p.rating),
-        fontSize: isNarrow ? 22 : 64,
+        fontSize: isNarrow ? 22 * medium : 64,
       ),
     );
   }
@@ -82,7 +94,7 @@ Widget coloredHandle(Profile p, BuildContext context) {
           text: p.handle![0],
           style: TextStyle(
             color: Colors.white,
-            fontSize: isNarrow ? 32 : 64,
+            fontSize: isNarrow ? 32 * medium : 64,
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -91,7 +103,7 @@ Widget coloredHandle(Profile p, BuildContext context) {
           text: p.handle!.substring(1),
           style: TextStyle(
             color: Colors.red,
-            fontSize: isNarrow ? 32 : 64,
+            fontSize: isNarrow ? 32 * medium : 64,
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -109,7 +121,14 @@ int min(int a, int b) {
 }
 
 // Get recent contests performance
-Widget recentContests(bool isNarrow, List<int> ratingHistory) {
+Widget recentContests(bool isNarrow, List<int> ratingHistory, double w) {
+  final isNarrow = w < 1550;
+  double medium = 1;
+  if (w < 1550 && w >= 900) {
+    medium = 1.5;
+  } else if (w < 900) {
+    medium = 1.0;
+  }
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -117,13 +136,13 @@ Widget recentContests(bool isNarrow, List<int> ratingHistory) {
         "Recent Contests",
         style: TextStyle(
           color: Colors.white,
-          fontSize: isNarrow ? 13 : 18,
+          fontSize: isNarrow ? 13 * medium : 18,
           fontWeight: FontWeight.w600,
         ),
       ),
 
       Wrap(
-        spacing: isNarrow ? 6 : 12,
+        spacing: isNarrow ? 6 * medium : 12,
         runSpacing: 4,
         children: List.generate(min(5, ratingHistory.length), (index) {
           int n = ratingHistory.length;
@@ -150,8 +169,8 @@ Widget recentContests(bool isNarrow, List<int> ratingHistory) {
             children: [
               Container(
                 padding: EdgeInsets.symmetric(
-                  horizontal: isNarrow ? 5 : 10,
-                  vertical: isNarrow ? 3 : 6,
+                  horizontal: isNarrow ? 5 * medium : 10,
+                  vertical: isNarrow ? 3 * medium : 6,
                 ),
                 decoration: BoxDecoration(
                   color: isPlus
@@ -164,7 +183,7 @@ Widget recentContests(bool isNarrow, List<int> ratingHistory) {
                 child: Text(
                   val,
                   style: TextStyle(
-                    fontSize: isNarrow ? 9 : 20,
+                    fontSize: isNarrow ? 9 * medium : 20,
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
@@ -176,11 +195,11 @@ Widget recentContests(bool isNarrow, List<int> ratingHistory) {
                   widthFactor: 0,
                   heightFactor: 0,
                   child: Transform.translate(
-                    offset: Offset(0, isNarrow ? 8 : 16),
+                    offset: Offset(0, isNarrow ? 8 * medium : 16),
                     child: Icon(
                       Icons.arrow_drop_up_outlined,
                       color: Color(0xFF4CC9F0),
-                      size: isNarrow ? 28 : 58,
+                      size: isNarrow ? 28 * medium : 58,
                     ),
                   ),
                 ),
@@ -193,6 +212,26 @@ Widget recentContests(bool isNarrow, List<int> ratingHistory) {
 }
 
 // Display average problem rating and success rate
+Color getSuccessrateColor(String successRate) {
+  Color color = Colors.white;
+  double sr = double.parse(successRate);
+  if (sr <= 15.00) {
+    color = Colors.red[800]!;
+  } else if (sr < 30.00) {
+    color = Colors.deepOrange;
+  } else if (sr < 40.00) {
+    color = Colors.yellow;
+  } else if (sr < 50.00) {
+    color = Colors.lightGreen;
+  } else if (sr < 60.00) {
+    color = Colors.green;
+  } else if (sr < 80) {
+    color = Colors.green[800]!;
+  } else {
+    color = Colors.cyan;
+  }
+  return color;
+}
 
 Widget averageProblemRatingAndSuccessRate(
   String overallAverageTag,
@@ -201,18 +240,27 @@ Widget averageProblemRatingAndSuccessRate(
   String recentAverage,
   bool inPercentage,
   bool isNarrow,
+  double medium,
 ) {
   String first = overallAverage;
   String second = recentAverage;
+  Color firstColor = Colors.white;
+  Color secondColor = Colors.white;
   if (inPercentage) {
+    firstColor = getSuccessrateColor(first);
+    secondColor = getSuccessrateColor(second);
     first = "$first%";
     second = "$second%";
+  } else {
+    // The data is about rating
+    firstColor = getCFColor(int.parse(first));
+    secondColor = getCFColor(int.parse(second));
   }
 
   const double boxWidth = 260;
   const double gap = 16;
 
-  Widget buildInfoBox(String title, String value) {
+  Widget buildInfoBox(String title, String value, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 18),
       decoration: BoxDecoration(
@@ -238,8 +286,8 @@ Widget averageProblemRatingAndSuccessRate(
             child: Text(
               value,
               style: TextStyle(
-                color: Colors.white,
-                fontSize: isNarrow? 32: 44,
+                color: color,
+                fontSize: isNarrow ? 32 : 44,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -249,10 +297,10 @@ Widget averageProblemRatingAndSuccessRate(
     );
   }
 
-  final Widget overallBox = buildInfoBox(overallAverageTag, first);
-  final Widget recentBox = buildInfoBox(recentAverageTag, second);
-
-  if (isNarrow) {
+  final Widget overallBox = buildInfoBox(overallAverageTag, first, firstColor);
+  final Widget recentBox = buildInfoBox(recentAverageTag, second, secondColor);
+  // medium = 1.5 -> Tablet mode, 1.0 -> Mobile
+  if (isNarrow && medium == 1.0) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,

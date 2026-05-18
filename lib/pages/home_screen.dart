@@ -40,8 +40,15 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
-    final isNarrow = w < 900;
-    print(w);
+    final isNarrow = w < 1550;
+    // medium = 1.5 -> Tablet mode, 1.0 -> Mobile
+    double medium = 1;
+    if (w < 1550 && w >= 900) {
+      medium = 1.5;
+    } else if (w < 900) {
+      medium = 1.0;
+    }
+    // print(w);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFF4CC9F0),
@@ -51,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
           maxLines: 2,
           style: TextStyle(
             fontWeight: FontWeight.w700,
-            fontSize: isNarrow ? 13 : 22,
+            fontSize: isNarrow ? 13 * medium : 22,
           ),
         ),
         // Take user input
@@ -103,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   hintText: 'Enter username',
                   hintStyle: TextStyle(
                     color: Colors.black,
-                    fontSize: isNarrow ? 13 : 20,
+                    fontSize: isNarrow ? 13 * medium : 20,
                   ),
                   filled: true,
                   fillColor: Colors.white12,
@@ -144,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           // 1. PFP + Username row
                           Padding(
                             padding: EdgeInsets.symmetric(
-                              horizontal: isNarrow ? 5 : 24,
+                              horizontal: isNarrow ? 5 * medium : 24,
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -155,20 +162,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: Image.network(
                                     snapshot.data!.titlePhoto ??
                                         "https://userpic.codeforces.org/no-title.jpg",
-                                    width: isNarrow ? 180 : 400,
-                                    height: isNarrow ? 180 : 400,
+                                    width: isNarrow ? 180 * medium : 400,
+                                    height: isNarrow ? 180 * medium : 400,
                                     fit: BoxFit.cover,
                                   ),
                                 ),
 
-                                SizedBox(width: isNarrow ? 10 : 20),
+                                SizedBox(width: isNarrow ? 10 * medium : 20),
 
                                 Flexible(
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      SizedBox(height: isNarrow ? 5 : 0),
+                                      SizedBox(
+                                        height: isNarrow ? 5 * medium : 0,
+                                      ),
 
                                       coloredHandle(snapshot.data!, context),
                                       // current rating
@@ -176,27 +185,35 @@ class _HomeScreenState extends State<HomeScreen> {
                                         "Current Rating",
                                         snapshot.data!.rating,
                                         isNarrow,
+                                        w,
                                       ),
                                       // max rating
                                       coloredRating(
                                         "Max Rating",
                                         snapshot.data!.maxRating,
                                         isNarrow,
+                                        w,
                                       ),
 
                                       const SizedBox(height: 8),
 
                                       // Recent contests
-                                      recentContests(isNarrow, ratingHistory),
+                                      recentContests(
+                                        isNarrow,
+                                        ratingHistory,
+                                        w,
+                                      ),
                                     ],
                                   ),
                                 ),
+                                if (!isNarrow) SizedBox(width: 30),
                                 if (!isNarrow)
                                   Flexible(
                                     child: Column(
                                       // crossAxisAlignment: CrossAxisAlignment.start,
                                       // mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
+                                        SizedBox(height: 55),
                                         averageProblemRatingAndSuccessRate(
                                           "Avg Solved Rating",
                                           stats.averageSolvedRating,
@@ -204,14 +221,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                           stats.recentAverageSolvedRating,
                                           false,
                                           isNarrow,
+                                          medium,
                                         ),
                                         averageProblemRatingAndSuccessRate(
-                                          "Success Rate",
+                                          "Overall Success Rate",
                                           stats.successRate,
                                           "Recent Success Rate",
                                           stats.recentSuccessRate,
                                           true,
                                           isNarrow,
+                                          medium,
                                         ),
                                       ],
                                     ),
@@ -232,6 +251,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               stats.recentAverageSolvedRating,
                               false,
                               isNarrow,
+                              medium,
                             ),
                           if (isNarrow)
                             averageProblemRatingAndSuccessRate(
@@ -241,6 +261,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               stats.recentSuccessRate,
                               true,
                               isNarrow,
+                              medium,
                             ),
                         ],
                       ),

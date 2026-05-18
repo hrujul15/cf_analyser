@@ -9,7 +9,13 @@ class RatingGraph extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
-    final isNarrow = w < 900;
+    final isNarrow = w < 1550;
+    double medium = 1;
+    if (w < 1550 && w >= 900) {
+      medium = 1.5;
+    } else if (w < 900) {
+      medium = 1.0;
+    }
     if (ratingHistory.isEmpty) {
       return const Center(
         child: Text("No rating data", style: TextStyle(color: Colors.white54)),
@@ -37,7 +43,7 @@ class RatingGraph extends StatelessWidget {
     int contests = ratingHistory.length + 1;
     int contestsInterval = ((contests / 20).floor()) * 2;
     if (contestsInterval == 0) contestsInterval = 1;
-    double padding = isNarrow ? 10 : 20;
+    double padding = isNarrow ? 10 * medium : 20;
     return Padding(
       padding: EdgeInsets.only(
         bottom: 20,
@@ -46,7 +52,7 @@ class RatingGraph extends StatelessWidget {
         right: padding,
       ),
       child: SizedBox(
-        height: isNarrow ? 300 : 600,
+        height: isNarrow ? 300 * medium : 600,
         width: double.infinity,
         child: LineChart(
           LineChartData(
@@ -78,7 +84,7 @@ class RatingGraph extends StatelessWidget {
                       value.toInt().toString(),
                       style: TextStyle(
                         color: Colors.white54,
-                        fontSize: isNarrow ? 10 : 15,
+                        fontSize: isNarrow ? 10 * medium : 15,
                       ),
                     );
                   },
@@ -87,7 +93,7 @@ class RatingGraph extends StatelessWidget {
               leftTitles: AxisTitles(
                 sideTitles: SideTitles(
                   showTitles: true,
-                  reservedSize: isNarrow ? 30 : 50,
+                  reservedSize: isNarrow ? 30 * medium : 50,
 
                   interval: ratingInterval.toDouble(),
                   getTitlesWidget: (value, meta) {
@@ -101,7 +107,7 @@ class RatingGraph extends StatelessWidget {
                       value.toInt().toString(),
                       style: TextStyle(
                         color: Colors.white54,
-                        fontSize: isNarrow ? 10 : 15,
+                        fontSize: isNarrow ? 10 * medium : 15,
                       ),
                     );
                   },
