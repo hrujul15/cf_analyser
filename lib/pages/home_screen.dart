@@ -1,8 +1,11 @@
-import 'package:cfar/utils/graph.dart';
+import 'package:cfar/utils/stats.dart';
+import 'package:cfar/utils/display_graph.dart';
 import 'package:flutter/material.dart';
-import 'package:cfar/services/fetch_user_data.dart';
-import 'package:cfar/utils/colors.dart';
-import 'package:cfar/services/fetch_rating_history.dart';
+import 'package:cfar/services/user_info.dart';
+import 'package:cfar/utils/display_user_data.dart';
+import 'package:cfar/services/user_rating.dart';
+import 'package:cfar/services/user_status.dart';
+import 'package:http/http.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,15 +19,17 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _inputHandler = TextEditingController();
   Future<Profile>? futureProfile;
-  Future<List<int>>? rating;
+  Future<List<int>>? futureRating;
+  Future<Status>? futureStatus;
+
+  late Status status;
+  Stats stats = Stats(
+    averageSolvedRating: "0",
+    successRate: "0.00",
+    recentAverageSolvedRating: "0",
+    recentSuccessRate: "0",
+  );
   List<int> ratingHistory = [];
-  int min(int a, int b) {
-    if (a < b) {
-      return a;
-    } else {
-      return b;
-    }
-  }
 
   @override
   void dispose() {
@@ -36,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
     final isNarrow = w < 900;
-    // print(isNarrow);
+    print(w);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFF4CC9F0),
@@ -49,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
             fontSize: isNarrow ? 13 : 22,
           ),
         ),
+        // Take user input
         actions: [
           SizedBox(
             width: isNarrow ? 150 : 350,
@@ -61,15 +67,31 @@ class _HomeScreenState extends State<HomeScreen> {
                   setState(() {
                     if (value.isNotEmpty) {
                       futureProfile = fetchProfile(value);
-                      rating = fetchRatingHistory(value);
+                      futureRating = fetchRatingHistory(value);
+                      futureStatus = fetchStatus(value);
                     }
                   });
 
-                  rating!.then((result) {
-                    setState(() {
-                      ratingHistory = result;
-                    });
-                  });
+                  futureRating!
+                      .then((result) {
+                        setState(() {
+                          ratingHistory = result;
+                        });
+                      })
+                      .catchError((e) {
+                        print(e);
+                      });
+
+                  futureStatus!
+                      .then((result) {
+                        setState(() {
+                          status = result;
+                          stats = getStats(status);
+                        });
+                      })
+                      .catchError((e) {
+                        print(e);
+                      });
                 },
                 style: TextStyle(
                   color: Colors.black,
@@ -99,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.only(top: 24),
           child: Column(
             children: [
-              // Display profile
+              // Display futureProfile
               FutureBuilder<Profile>(
                 future: futureProfile,
                 builder: (context, snapshot) {
@@ -120,133 +142,106 @@ class _HomeScreenState extends State<HomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           // 1. PFP + Username row
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(2),
-                                child: Image.network(
-                                  snapshot.data!.titlePhoto ??
-                                      "https://userpic.codeforces.org/no-title.jpg",
-                                  width: isNarrow ? 180 : 400,
-                                  height: isNarrow ? 180 : 400,
-                                  fit: BoxFit.cover,
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isNarrow ? 5 : 24,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(2),
+                                  child: Image.network(
+                                    snapshot.data!.titlePhoto ??
+                                        "https://userpic.codeforces.org/no-title.jpg",
+                                    width: isNarrow ? 180 : 400,
+                                    height: isNarrow ? 180 : 400,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
-                              ),
 
-                              SizedBox(width: isNarrow ? 10 : 20),
+                                SizedBox(width: isNarrow ? 10 : 20),
 
-                              Flexible(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    coloredHandle(snapshot.data!, context),
+                                Flexible(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(height: isNarrow ? 5 : 0),
 
-                                    Text(
-                                      "Current Rating: ${snapshot.data!.rating ?? "Unrated"}",
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: isNarrow ? 12 : 28,
-                                        fontWeight: FontWeight.w600,
+                                      coloredHandle(snapshot.data!, context),
+                                      // current rating
+                                      coloredRating(
+                                        "Current Rating",
+                                        snapshot.data!.rating,
+                                        isNarrow,
                                       ),
-                                    ),
-
-                                    Text(
-                                      "Max Rating: ${snapshot.data!.maxRating ?? "Unrated"}",
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: isNarrow ? 12 : 28,
-                                        fontWeight: FontWeight.w600,
+                                      // max rating
+                                      coloredRating(
+                                        "Max Rating",
+                                        snapshot.data!.maxRating,
+                                        isNarrow,
                                       ),
-                                    ),
 
-                                    const SizedBox(height: 8),
+                                      const SizedBox(height: 8),
 
-                                    Text(
-                                      "Recent Contests",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: isNarrow ? 12 : 18,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-
-                                    Wrap(
-                                      spacing: 8,
-                                      runSpacing: 4,
-                                      children: List.generate(
-                                        min(5, ratingHistory.length),
-                                        (index) {
-                                          int n = ratingHistory.length;
-                                          List<String> values = [];
-
-                                          for (int i = n - 1; i >= 1; --i) {
-                                            int val =
-                                                ratingHistory[i] -
-                                                ratingHistory[i - 1];
-                                            values.add(
-                                              val > 0 ? "+$val" : "$val",
-                                            );
-                                          }
-
-                                          if (index >= values.length) {
-                                            return const SizedBox();
-                                          }
-
-                                          final val = values[index];
-                                          final isPlus = val.startsWith("+");
-                                          final isMinus = val.startsWith("-");
-
-                                          return Container(
-                                            padding: EdgeInsets.symmetric(
-                                              horizontal: isNarrow ? 5 : 10,
-                                              vertical: isNarrow ? 3 : 6,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: isPlus
-                                                  ? Colors.green[900]
-                                                  : isMinus
-                                                  ? Colors.red[900]
-                                                  : Colors.grey,
-                                              borderRadius:
-                                                  BorderRadius.circular(5),
-                                            ),
-                                            child: Text(
-                                              val,
-                                              style: TextStyle(
-                                                fontSize: isNarrow ? 8 : 20,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ],
+                                      // Recent contests
+                                      recentContests(isNarrow, ratingHistory),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                                if (!isNarrow)
+                                  Flexible(
+                                    child: Column(
+                                      // crossAxisAlignment: CrossAxisAlignment.start,
+                                      // mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        averageProblemRatingAndSuccessRate(
+                                          "Avg Solved Rating",
+                                          stats.averageSolvedRating,
+                                          "Recent Avg Solved Rating",
+                                          stats.recentAverageSolvedRating,
+                                          false,
+                                          isNarrow,
+                                        ),
+                                        averageProblemRatingAndSuccessRate(
+                                          "Success Rate",
+                                          stats.successRate,
+                                          "Recent Success Rate",
+                                          stats.recentSuccessRate,
+                                          true,
+                                          isNarrow,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ),
 
                           // Graph
-                          // FutureBuilder<List<int>>(
-                          //   future: rating,
-                          //   builder: (context, snapshot) {
-                          //     if (!snapshot.hasData) {
-                          //       return const CircularProgressIndicator();
-                          //     }
-                          //     // data = snapshot.data!;
-                          //     return RatingGraph(ratingHistory: snapshot.data!);
-                          //   },
-                          // ),
-                          // // Builder(builder: builder)
                           RatingGraph(ratingHistory: ratingHistory),
+
+                          // average solved rating
+                          if (isNarrow)
+                            averageProblemRatingAndSuccessRate(
+                              "Avg Solved Rating",
+                              stats.averageSolvedRating,
+                              "Recent Avg Solved Rating",
+                              stats.recentAverageSolvedRating,
+                              false,
+                              isNarrow,
+                            ),
+                          if (isNarrow)
+                            averageProblemRatingAndSuccessRate(
+                              "Success Rate",
+                              stats.successRate,
+                              "Recent Success Rate",
+                              stats.recentSuccessRate,
+                              true,
+                              isNarrow,
+                            ),
                         ],
                       ),
                     );

@@ -13,7 +13,6 @@ Future<Profile> fetchProfile(String username) async {
     return Profile.fromJson(data["result"][0]);
   } else {
     throw Exception('Profile doesn\'t exist');
-    
   }
 }
 
