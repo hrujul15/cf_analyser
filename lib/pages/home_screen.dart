@@ -5,7 +5,6 @@ import 'package:cfar/services/user_info.dart';
 import 'package:cfar/utils/display_user_data.dart';
 import 'package:cfar/services/user_rating.dart';
 import 'package:cfar/services/user_status.dart';
-import 'package:http/http.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -53,12 +52,12 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: Color(0xFF4CC9F0),
         title: Text(
-          'CFAR - Codeforces Analyzer & Recommender',
+          'Codeforces Profile',
           softWrap: true,
           maxLines: 2,
           style: TextStyle(
             fontWeight: FontWeight.w700,
-            fontSize: isNarrow ? 13 * medium : 22,
+            fontSize: isNarrow ? 15 * medium : 22,
           ),
         ),
         // Take user input
@@ -85,9 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ratingHistory = result;
                         });
                       })
-                      .catchError((e) {
-                        print(e);
-                      });
+                      .catchError((e) {});
 
                   futureStatus!
                       .then((result) {
@@ -96,9 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           stats = getStats(status);
                         });
                       })
-                      .catchError((e) {
-                        print(e);
-                      });
+                      .catchError((e) {});
                 },
                 style: TextStyle(
                   color: Colors.black,
@@ -224,9 +219,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                           medium,
                                         ),
                                         averageProblemRatingAndSuccessRate(
-                                          "Overall Success Rate",
+                                          "Overall Accuracy",
                                           stats.successRate,
-                                          "Recent Success Rate",
+                                          "Recent Accuracy",
                                           stats.recentSuccessRate,
                                           true,
                                           isNarrow,
@@ -255,9 +250,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           if (isNarrow)
                             averageProblemRatingAndSuccessRate(
-                              "Success Rate",
+                              "Overall Accuracy",
                               stats.successRate,
-                              "Recent Success Rate",
+                              "Recent Accuracy",
                               stats.recentSuccessRate,
                               true,
                               isNarrow,
